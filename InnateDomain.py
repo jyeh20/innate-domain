@@ -20,6 +20,7 @@ class InnateDomain:
   def __init__(self) -> None:
     """Initializes an Innate Domain.
     """
+    self.active = False
     self.logger: Logger = Logger("InnateDomain")
     turnLEDOn()
     self.zeus: ZeusConnector = ZeusConnector(ZEUS, ZEUS_PW)
@@ -35,6 +36,7 @@ class InnateDomain:
       self.reset()
     else:
       self.logger.log("Successfully connected to network!")
+      self.active = True
 
   def run(self) -> None:
     self.logger.log("Running the Innate Domain")
@@ -46,6 +48,7 @@ class InnateDomain:
       self.logger.log("User interrupt!")
     except Exception as error:
       self.logger.log(f"{error}")
+      raise Exception(error)
     finally:
       self.reset()
 
@@ -53,6 +56,9 @@ class InnateDomain:
     """Resets the Innate Domain, destroying all connections.
     """
     self.logger.logNewline("Resetting the Innate Domain")
-    self.zeus.disconnect()
     self.zeus_socket.disconnect()
+    self.zeus.disconnect()
     turnLEDOff()
+
+  def isActive(self) -> bool:
+    return self.active

@@ -21,6 +21,7 @@ class ZeusConnector:
     """
     self.zeusLogger = Logger(self.__class__.__name__)
     self.zeus = network.WLAN(network.STA_IF)
+    self.zeus.active(True)
     self.ssid = ssid
     self.password = password
 
@@ -34,24 +35,30 @@ class ZeusConnector:
     Returns:
         network.WLAN: The connection to the Zeus network.
     """
-    self.zeusLogger.logNewline(f"Connecting to {self.ssid}. Will timeout after {connection_timeout * 2} seconds")
-    self.zeus.active(True)
-    if not self.zeus.isconnected():
-      self.zeus.connect(self.ssid, self.password)
-      while not self.zeus.isconnected() and connection_timeout > 0:
-        self.zeusLogger.log(f"Waiting for connection... {connection_timeout}")
-        sleep(2)
-        connection_timeout -= 1
-    if self.zeus.isconnected():
-      # self.zeusLogger.log(f"Connected! IP is {self.zeus.ifconfig()[IP_INDEX]}")
-      self.zeusLogger.log(f"Connected! IP is {self.zeus.ifconfig()[IP_INDEX]}")
+    try:
+      self.zeusLogger.logNewline(f"Connecting to {self.ssid}. Will timeout after {connection_timeout * 2} seconds")
+      if not self.zeus.isconnected():
+        self.zeus.connect(self.ssid, self.password)
+        while not self.zeus.isconnected() and connection_timeout > 0:
+          self.zeusLogger.log(f"Waiting for connection... {connection_timeout}")
+          sleep(2)
+          connection_timeout -= 1
+      if self.zeus.isconnected():
+        # self.zeusLogger.log(f"Connected! IP is {self.zeus.ifconfig()[IP_INDEX]}")
+        self.zeusLogger.log(f"Connected! IP is {self.zeus.ifconfig()[IP_INDEX]}")
+      else:
+        raise TimeoutError(f"Did not connect to {self.ssid} in the alloted time")
+    except KeyboardInterrupt:
+      raise KeyboardInterrupt()
     return self.zeus
 
   def disconnect(self):
     """Disconnects the Innate Domain from the Zeus network.
     """
     self.zeusLogger.logNewline("Disconnecting")
+    sleep(2)
     self.zeus.disconnect()
+    self.zeus.active(False)
 
   def getIPAddress(self) -> str:
     """Retrieves and returns this Innate Domain's IP address.

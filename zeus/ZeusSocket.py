@@ -1,5 +1,7 @@
 import socket
 import select
+import json
+from time import sleep
 from utils.Log import Logger
 from utils.consts import getConstValue
 
@@ -18,11 +20,12 @@ class ZeusSocket:
   def connect(self) -> socket.socket:
     self.zeusLogger.logNewline(f"Connecting socket on IP: {self.IP}")
     self.socket.connect((self.IP, self.port))
-    self.socket.send(f"Hello from Innate Domain")
+    self.sendMsg(f"Hello from Innate Domain")
     return self.socket
 
   def disconnect(self) -> None:
-    self.zeusLogger.logNewline("Disconnecting socket")
+    self.sendMsg("Disconnecting socket")
+    sleep(2)
     self.socket.close()
 
   def listen(self) -> None:
@@ -35,7 +38,7 @@ class ZeusSocket:
           self.zeusLogger.log("Disconnected from server")
         else:
           self.zeusLogger.log(data)
-    # self.poller.register(self.socket, select.POLLIN)
-    # res = self.poller.poll(1000)
-    # if res:
-    #   self.zeusLogger.log(res)
+
+  def sendMsg(self, msg) -> None:
+    self.zeusLogger.log(f"Sending socket msg: {msg}")
+    self.socket.send(msg)
