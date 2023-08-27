@@ -5,4 +5,4 @@ init()
 
 domain = InnateDomain()
 
-domain.reset()
+domain.run()

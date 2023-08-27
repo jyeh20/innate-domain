@@ -1,9 +1,15 @@
-from private.private import getPrivateValue
+from time import sleep
 from utils.Log import Logger
+from private.private import getPrivateValue
+from utils.consts import getConstValue
 from zeus.ZeusConnector import ZeusConnector
+from zeus.ZeusSocket import ZeusSocket
+from utils.onboardLED import turnLEDOff, turnLEDOn
 
 ZEUS = getPrivateValue("ZEUS_SSID")
 ZEUS_PW = getPrivateValue("ZEUS_PASSWORD")
+SOCKET_PORT = int(getPrivateValue("ZEUS_SOCKET_PORT"))
+NETWORK_TIMEOUT: int = int(getConstValue("NETWORK_TIMEOUT"))
 
 
 class InnateDomain:
@@ -11,15 +17,42 @@ class InnateDomain:
      controlling LED lights around a poster collection.
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes an Innate Domain.
     """
-    self.logger = Logger("InnateDomain")
-    self.logger.logNewline("Initializing an Innate Domain")
-    self.zeus = ZeusConnector(ZEUS, ZEUS_PW)
+    self.logger: Logger = Logger("InnateDomain")
+    turnLEDOn()
+    self.zeus: ZeusConnector = ZeusConnector(ZEUS, ZEUS_PW)
+    self.zeus_socket: ZeusSocket = ZeusSocket(self.zeus.getHostIPAddress(), SOCKET_PORT)
+    self.connectNetwork()
 
-  def reset(self):
+  def connectNetwork(self) -> None:
+    try:
+      self.zeus.connect(NETWORK_TIMEOUT)
+      self.zeus_socket.connect()
+    except Exception as error:
+      self.logger.log(f"{error}")
+      self.reset()
+    else:
+      self.logger.log("Successfully connected to network!")
+
+  def run(self) -> None:
+    self.logger.log("Running the Innate Domain")
+    try:
+      self.logger.log("Entering listening loop")
+      while True:
+        self.zeus_socket.listen()
+    except KeyboardInterrupt:
+      self.logger.log("User interrupt!")
+    except Exception as error:
+      self.logger.log(f"{error}")
+    finally:
+      self.reset()
+
+  def reset(self) -> None:
     """Resets the Innate Domain, destroying all connections.
     """
     self.logger.logNewline("Resetting the Innate Domain")
     self.zeus.disconnect()
+    self.zeus_socket.disconnect()
+    turnLEDOff()
