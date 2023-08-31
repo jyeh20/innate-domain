@@ -3,13 +3,8 @@ from time import sleep
 from utils.consts import getConstValue
 from utils.Log import Logger
 
-<<<<<<< HEAD
 IP_INDEX: int = 0
 HOST_IP_INDEX: int = 2
-=======
-NETWORK_TIMEOUT: int = int(getConstValue("NETWORK_TIMEOUT"))
-IP_INDEX: int = 0
->>>>>>> 91c57b0511b3c1d5a3922618d1ec0192681173c1
 
 
 class ZeusConnector:
