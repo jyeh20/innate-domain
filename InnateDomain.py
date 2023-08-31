@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from time import sleep
 from utils.Log import Logger
 from private.private import getPrivateValue
@@ -11,14 +10,6 @@ ZEUS = getPrivateValue("ZEUS_SSID")
 ZEUS_PW = getPrivateValue("ZEUS_PASSWORD")
 SOCKET_PORT = int(getPrivateValue("INNATE_DOMAIN_SOCKET_PORT"))
 NETWORK_TIMEOUT: int = int(getConstValue("NETWORK_TIMEOUT"))
-=======
-from private.private import getPrivateValue
-from utils.Log import Logger
-from zeus.ZeusConnector import ZeusConnector
-
-ZEUS = getPrivateValue("ZEUS_SSID")
-ZEUS_PW = getPrivateValue("ZEUS_PASSWORD")
->>>>>>> 91c57b0511b3c1d5a3922618d1ec0192681173c1
 
 
 class InnateDomain:
