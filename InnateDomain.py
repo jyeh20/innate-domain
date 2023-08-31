@@ -8,7 +8,7 @@ from utils.onboardLED import turnLEDOff, turnLEDOn
 
 ZEUS = getPrivateValue("ZEUS_SSID")
 ZEUS_PW = getPrivateValue("ZEUS_PASSWORD")
-SOCKET_PORT = int(getPrivateValue("ZEUS_SOCKET_PORT"))
+SOCKET_PORT = int(getPrivateValue("INNATE_DOMAIN_SOCKET_PORT"))
 NETWORK_TIMEOUT: int = int(getConstValue("NETWORK_TIMEOUT"))
 
 
@@ -23,13 +23,21 @@ class InnateDomain:
     self.active = False
     self.logger: Logger = Logger("InnateDomain")
     turnLEDOn()
-    self.zeus: ZeusConnector = ZeusConnector(ZEUS, ZEUS_PW)
-    self.zeus_socket: ZeusSocket = ZeusSocket(self.zeus.getHostIPAddress(), SOCKET_PORT)
+    self.zeus = ZeusConnector(ZEUS, ZEUS_PW)
+    self.zeus_socket = ZeusSocket(
+      self.zeus.getIPAddress(),
+      self.zeus.getHostIPAddress(),
+      SOCKET_PORT
+    )
     self.connectNetwork()
 
   def connectNetwork(self) -> None:
     try:
-      self.zeus.connect(NETWORK_TIMEOUT)
+      try:
+        self.zeus.connect(NETWORK_TIMEOUT)
+      except Exception as e:
+        self.logger.log(f"{e}")
+        raise Exception("Failed to connect to zeus")
       self.zeus_socket.connect()
     except Exception as error:
       self.logger.log(f"{error}")
@@ -46,9 +54,10 @@ class InnateDomain:
         self.zeus_socket.listen()
     except KeyboardInterrupt:
       self.logger.log("User interrupt!")
+    except RuntimeError as error:
+      self.logger.log(f"{error}")
     except Exception as error:
       self.logger.log(f"{error}")
-      raise Exception(error)
     finally:
       self.reset()
 
